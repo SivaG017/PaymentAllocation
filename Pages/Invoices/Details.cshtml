@@ -1,0 +1,126 @@
+@page "{id:guid}"
+@model PaymentAllocation.Pages.Invoices.DetailsModel
+@{
+    ViewData["Title"] = "Invoice details";
+}
+
+<div class="page-shell">
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="alert alert-success">@Model.Message</div>
+    }
+
+    @if (Model.Invoice is null)
+    {
+        <div class="alert alert-warning">Invoice not found.</div>
+    }
+    else
+    {
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">Invoice workflow</p>
+                <h1>@Model.Invoice.CustomerReference</h1>
+                <p class="lead">Created @Model.Invoice.CreatedAt.UtcDateTime.ToString("dd MMM yyyy HH:mm") UTC.</p>
+            </div>
+            <a class="btn btn-outline-secondary" asp-page="/Invoices/Create">Create another invoice</a>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span>Outstanding balance</span>
+                <strong>£@Model.Invoice.OutstandingBalance.ToString("0.00")</strong>
+            </div>
+            <div class="summary-card">
+                <span>Line items</span>
+                <strong>@Model.Invoice.LineItems.Count</strong>
+            </div>
+            <div class="summary-card">
+                <span>Ledger entries</span>
+                <strong>@Model.Invoice.LedgerEntries.Count</strong>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-body">
+                <div class="section-head">
+                    <div>
+                        <h2>Line items</h2>
+                        <p>Ordered by due date, then creation order.</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Due date</th>
+                                <th>Original</th>
+                                <th>Outstanding</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var line in Model.Invoice.LineItems)
+                            {
+                                <tr>
+                                    <td>@line.Description</td>
+                                    <td>@line.DueDate.ToString("dd MMM yyyy")</td>
+                                    <td>£@line.OriginalAmount.ToString("0.00")</td>
+                                    <td>£@line.OutstandingBalance.ToString("0.00")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-grid">
+            <div class="panel">
+                <div class="panel-body">
+                    <div class="section-head">
+                        <div>
+                            <h2>Allocate payment</h2>
+                            <p>Apply a payment using oldest-first allocation.</p>
+                        </div>
+                    </div>
+
+                    <form method="post" asp-page-handler="Allocate" asp-route-id="@Model.Invoice.Id" class="stacked-form">
+                        <div class="mb-3">
+                            <label asp-for="PaymentAmount" class="form-label">Payment amount</label>
+                            <input asp-for="PaymentAmount" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                            <span asp-validation-for="PaymentAmount" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Allocate payment</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-body">
+                    <div class="section-head">
+                        <div>
+                            <h2>Ledger entries</h2>
+                            <p>Append-only entries used to derive balances.</p>
+                        </div>
+                    </div>
+
+                    <div class="ledger-list">
+                        @foreach (var entry in Model.Invoice.LedgerEntries)
+                        {
+                            <div class="ledger-row">
+                                <div>
+                                    <strong>@entry.EntryType</strong>
+                                    <div class="muted">@entry.CreatedAt.UtcDateTime.ToString("dd MMM yyyy HH:mm") UTC</div>
+                                </div>
+                                <div class="ledger-amount @(entry.Amount >= 0 ? "positive" : "negative")">
+                                    £@entry.Amount.ToString("0.00")
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

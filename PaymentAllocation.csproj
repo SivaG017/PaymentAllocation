@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="src\**\*.cs" />
+    <Compile Remove="tests\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="src/Ledger.Application/Ledger.Application.csproj" />
+    <ProjectReference Include="src/Ledger.Domain/Ledger.Domain.csproj" />
+    <ProjectReference Include="src/Ledger.Infrastructure/Ledger.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

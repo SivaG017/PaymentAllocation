@@ -1,0 +1,70 @@
+@page
+@model PaymentAllocation.Pages.IndexModel
+@{
+    ViewData["Title"] = "Ledger Dashboard";
+}
+
+<div class="page-shell">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Payment allocation workflow</p>
+            <h1>Ledger dashboard</h1>
+            <p class="lead">Create invoices, inspect balances, and allocate payments from one place.</p>
+        </div>
+        <div class="header-actions">
+            <a class="btn btn-primary" asp-page="/Invoices/Create">Create invoice</a>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-body">
+            <div class="section-head">
+                <div>
+                    <h2>Invoices</h2>
+                    <p>Open an invoice to review the ledger and allocate payments.</p>
+                </div>
+            </div>
+
+            @if (!Model.Invoices.Any())
+            {
+                <div class="empty-state">
+                    <h3>No invoices yet</h3>
+                    <p>Create the first invoice to start the payment workflow.</p>
+                    <a class="btn btn-primary" asp-page="/Invoices/Create">Create invoice</a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Created</th>
+                                <th>Lines</th>
+                                <th>Outstanding</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var invoice in Model.Invoices)
+                            {
+                                <tr>
+                                    <td>@invoice.CustomerReference</td>
+                                    <td>@invoice.CreatedAt.UtcDateTime.ToString("dd MMM yyyy HH:mm") UTC</td>
+                                    <td>@invoice.LineCount</td>
+                                    <td class="@(invoice.OutstandingBalance >= 0 ? "text-success" : "text-danger")">
+                                        £@invoice.OutstandingBalance.ToString("0.00")
+                                    </td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-primary" asp-page="/Invoices/Details" asp-route-id="@invoice.Id">Open</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
